@@ -4,16 +4,30 @@ const path = require("path");
 const generateFileList = (currentPath, relativePath) => {
   try {
     const items = fs.readdirSync(currentPath);
+    const sortedItems = items
+      .map((item) => {
+        const itemPath = path.join(currentPath, item);
+        return {
+          name: item,
+          path: itemPath,
+          relativePath: path.join(relativePath, item),
+          isDirectory: fs.statSync(itemPath).isDirectory(),
+        };
+      })
+      .sort((a, b) => {
+        if (a.isDirectory === b.isDirectory) {
+          return a.name.localeCompare(b.name);
+        }
+        return a.isDirectory ? -1 : 1;
+      });
 
-    const filesAndFolders = items.map((item) => {
-      const itemPath = path.join(currentPath, item);
-      const relativeItemPath = path.join(relativePath, item);
-      const isDirectory = fs.statSync(itemPath).isDirectory();
-
-      return isDirectory
-        ? `<li>📁 <a href="/browse/${relativeItemPath}">${item}/</a></li>`
-        : `<li>📄 <a href="/files/${relativeItemPath}" target="_blank">${item}</a></li>`;
-    });
+    const filesAndFolders = sortedItems.map((item) =>
+      item.isDirectory
+        ? `<li>📁 <a href="/browse/${item.relativePath}">${item.name}/</a></li>`
+        : `<li>📄 <a href="/files/${item.relativePath}" target="_blank">${item.name}</a>
+            <button onclick="copyToClipboard('${item.relativePath}')">📋 Copy URL</button>
+           </li>`
+    );
 
     return filesAndFolders.join("");
   } catch (error) {
@@ -47,11 +61,22 @@ const browseHandler = (req, res) => {
         <style>
           body { font-family: Arial, sans-serif; padding: 20px; }
           ul { list-style: none; padding: 0; }
-          li { margin: 8px 0; font-size: 18px; }s
+          li { margin: 8px 0; font-size: 18px; }
           a { text-decoration: none; color: blue; }
           a:hover { text-decoration: underline; }
+          button { margin-left: 10px; padding: 4px 8px; cursor: pointer; }
           .container { max-width: 800px; margin: auto; }
         </style>
+        <script>
+          function copyToClipboard(path) {
+            const url = window.location.origin + "/files/" + path;
+            navigator.clipboard.writeText(url).then(() => {
+              alert("Copied: " + url);
+            }).catch(err => {
+              console.error("Failed to copy", err);
+            });
+          }
+        </script>
       </head>
       <body>
         <div class="container">
