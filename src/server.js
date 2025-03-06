@@ -35,6 +35,10 @@ app.use((_req, res, next) => {
   res.setHeader("Accept-Ranges", "bytes");
   next();
 });
+app.use((req, _res, next) => {
+  req.baseFolder = BASE_FOLDER;
+  next();
+});
 
 /**
  * ROUTES
@@ -44,9 +48,9 @@ app.get("/browse/*", browseHandler);
 
 app.get("/files/*", (req, res) => {
   let relativePath = req.params[0];
-  let filePath = path.join(BASE_FOLDER, relativePath);
+  let filePath = path.join(req.baseFolder, relativePath);
 
-  if (!filePath.startsWith(BASE_FOLDER)) {
+  if (!filePath.startsWith(req.baseFolder)) {
     return res.status(403).send("Forbidden");
   }
 

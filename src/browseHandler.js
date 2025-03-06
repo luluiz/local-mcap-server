@@ -1,8 +1,6 @@
 const fs = require("fs");
 const path = require("path");
 
-const BASE_FOLDER = "/";
-
 const generateFileList = (currentPath, relativePath) => {
   try {
     const items = fs.readdirSync(currentPath);
@@ -25,9 +23,9 @@ const generateFileList = (currentPath, relativePath) => {
 
 const browseHandler = (req, res) => {
   let relativePath = req.params[0] || "";
-  let currentPath = path.join(BASE_FOLDER, relativePath);
+  let currentPath = path.join(req.baseFolder, relativePath);
 
-  if (!currentPath.startsWith(BASE_FOLDER)) {
+  if (!currentPath.startsWith(req.baseFolder)) {
     return res.status(403).send("Forbidden");
   }
 
