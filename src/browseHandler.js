@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const BASE_FOLDER = "/Users/ctw02228/Documents/Goldbergs/mcap/";
+const BASE_FOLDER = "/";
 
 const generateFileList = (currentPath, relativePath) => {
   try {
